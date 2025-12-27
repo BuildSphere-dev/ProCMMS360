@@ -1,13 +1,16 @@
 from datetime import datetime, timedelta
 from jose import jwt
 import os
+from typing import Final
 
-SECRET_KEY = os.getenv("JWT_SECRET_KEY")
-ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
-EXPIRE_MINUTES = int(os.getenv("JWT_EXPIRE_MINUTES", "60"))
+_secret = os.getenv("JWT_SECRET_KEY")
+if _secret is None:
+    raise RuntimeError("JWT_SECRET_KEY is not set")
 
-if not SECRET_KEY:
-    raise RuntimeError("JWT_SECRET_KEY is not set in environment variables")
+SECRET_KEY: Final[str] = _secret  # ✅ rebind as str
+
+ALGORITHM: Final[str] = os.getenv("JWT_ALGORITHM", "HS256")
+EXPIRE_MINUTES: Final[int] = int(os.getenv("JWT_EXPIRE_MINUTES", "60"))
 
 
 def create_access_token(data: dict) -> str:

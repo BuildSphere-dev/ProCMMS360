@@ -1,12 +1,14 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
+from Backend.app.core.auth import get_current_user
 from app.database import get_db
 from app.models.department import Department
 from app.schemas.department import DepartmentCreate, DepartmentRead
 
-router = APIRouter()
-
+router = APIRouter(
+    dependencies=[Depends(get_current_user)]
+)
 
 @router.post("/", response_model=DepartmentRead)
 def create_department(

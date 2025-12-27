@@ -3,17 +3,19 @@ from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 from jose import jwt, JWTError
 import os
+from typing import Final
 
 from app.database import get_db
 from app.models.user import User, UserRole
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 
-SECRET_KEY = os.getenv("JWT_SECRET_KEY")
-ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
+_secret = os.getenv("JWT_SECRET_KEY")
+if _secret is None:
+    raise RuntimeError("JWT_SECRET_KEY is not set")
 
-if not SECRET_KEY:
-    raise RuntimeError("JWT_SECRET_KEY is not set in environment variables")
+SECRET_KEY: Final[str] = _secret
+ALGORITHM: Final[str] = os.getenv("JWT_ALGORITHM", "HS256")
 
 
 def get_current_user(
