@@ -4,3 +4,5 @@ email-validator
 sqlalchemy
 psycopg2-binary
 pydantic
+python-jose
+passlib[bcrypt]

@@ -1,10 +1,10 @@
-from sqlalchemy import Column, Integer, String, Boolean, Enum, DateTime
-from sqlalchemy.sql import func
-from app.database import Base
+from sqlalchemy import Column, Integer, String, Enum, Boolean, DateTime
+from datetime import datetime
 import enum
+from app.database import Base
 
 
-class UserRole(enum.Enum):
+class UserRole(str, enum.Enum):
     employee = "employee"
     technician = "technician"
     manager = "manager"
@@ -17,7 +17,7 @@ class User(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=False)
     email = Column(String, unique=True, nullable=False, index=True)
-    role = Column(Enum(UserRole), nullable=False)
-    avatar_url = Column(String)
+    password_hash = Column(String, nullable=False)  # ✅ IMPORTANT
+    role = Column(Enum(UserRole), default=UserRole.employee)
     is_active = Column(Boolean, default=True)
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    created_at = Column(DateTime, default=datetime.utcnow)

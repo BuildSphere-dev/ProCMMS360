@@ -4,9 +4,12 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.equipment import Equipment
 from app.models.maintenance_request import MaintenanceRequest, RequestStatus
-from app.schemas.equipment import EquipmentCreate
+from app.schemas.equipment import EquipmentCreate,  EquipmentUpdate
+from app.core.auth import get_current_user
 
-router = APIRouter()
+router = APIRouter(
+    dependencies=[Depends(get_current_user)]
+)
 
 
 @router.post("/")
@@ -50,17 +53,20 @@ def get_equipment(equipment_id: int, db: Session = Depends(get_db)):
 @router.put("/{equipment_id}")
 def update_equipment(
     equipment_id: int,
-    payload: EquipmentCreate,
+    payload: EquipmentUpdate,   # ✅ CORRECT SCHEMA
     db: Session = Depends(get_db)
 ):
-    eq = db.query(Equipment).get(equipment_id)
+    eq = db.query(Equipment).filter(Equipment.id == equipment_id).first()
     if not eq:
         raise HTTPException(404, "Equipment not found")
 
-    for k, v in payload.dict().items():
-        setattr(eq, k, v)
+    update_data = payload.dict(exclude_unset=True)
+
+    for field, value in update_data.items():
+        setattr(eq, field, value)
 
     db.commit()
+    db.refresh(eq)
     return eq
 
 

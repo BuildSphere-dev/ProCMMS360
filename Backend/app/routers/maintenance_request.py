@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+from app.core.auth import get_current_user
 from datetime import datetime
 
 from app.database import get_db
@@ -10,7 +11,9 @@ from app.models.maintenance_request import (
 from app.models.equipment import Equipment
 from app.schemas.maintenance_requests import MaintenanceRequestCreate
 
-router = APIRouter()
+router = APIRouter(
+    dependencies=[Depends(get_current_user)]
+)
 
 
 @router.post("/")
