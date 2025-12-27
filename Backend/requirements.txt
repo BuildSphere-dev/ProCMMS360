@@ -2,8 +2,9 @@ fastapi
 uvicorn
 sqlalchemy
 psycopg2-binary
-pydantic
-email-validator
 python-jose
-passlib[bcrypt]
+email-validator
 python-multipart
+
+passlib==1.7.4
+bcrypt==3.2.2
