@@ -1,9 +1,9 @@
-name: Project Structure Check
+name: Backend Structure Check
 
 on:
   pull_request:
   push:
-    branches: [ "main", "dev" ]
+    branches: ["main", "dev"]
 
 jobs:
   structure-check:
@@ -13,14 +13,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Check required directories
+      - name: Check required backend directories
         run: |
           required_dirs=(
-            "app"
-            "app/models"
-            "app/routers"
-            "app/schemas"
-            "app/core"
+            "Backend/app"
+            "Backend/app/models"
+            "Backend/app/routers"
+            "Backend/app/schemas"
+            "Backend/app/core"
             ".github/workflows"
           )
 
@@ -31,16 +31,16 @@ jobs:
             fi
           done
 
-          echo "✅ All required directories exist"
+          echo "✅ All required backend directories exist"
 
-      - name: Check required files
+      - name: Check required backend files
         run: |
           required_files=(
-            "app/main.py"
-            "app/database.py"
-            "Dockerfile"
-            "docker-compose.yml"
-            "requirements.txt"
+            "Backend/app/main.py"
+            "Backend/app/database.py"
+            "Backend/Dockerfile"
+            "Backend/docker-compose.yml"
+            "Backend/requirements.txt"
           )
 
           for file in "${required_files[@]}"; do
@@ -50,4 +50,4 @@ jobs:
             fi
           done
 
-          echo "✅ All required files exist"
+          echo "✅ All required backend files exist"
