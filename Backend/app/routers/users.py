@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.database import get_db
-from app.models.user import User
+from app.models.user import User, UserRole
 from app.core.auth import get_current_user
 
 router = APIRouter(
@@ -36,7 +36,8 @@ def create_user(
     user = User(
         name=name,
         email=email,
-        role=role
+        role=UserRole(role),
+        password_hash="dummy"   # 👈 REQUIRED FIX
     )
     db.add(user)
     db.commit()
