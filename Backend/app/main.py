@@ -8,6 +8,7 @@ from app.routers import (
     maintenance_request,
     users,
     auth,
+    department,
 )
 
 app = FastAPI(title="FixTrack API")
@@ -22,4 +23,5 @@ app.include_router(equipment.router, prefix="/api/equipment", tags=["Equipment"]
 app.include_router(teams.router, prefix="/api/maintenance-teams", tags=["Teams"])
 app.include_router(maintenance_request.router, prefix="/api/maintenance-requests", tags=["Maintenance Requests"])
 app.include_router(users.router, prefix="/api/users", tags=["Users"])
+app.include_router(department.router, prefix="/api/department", tags=["Department"])
 app.include_router(auth.router, prefix="/api/auth", tags=["Auth"])
