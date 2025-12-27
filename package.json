@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "date-fns": "^4.1.0",
+    "react-beautiful-dnd": "^13.1.1",
+    "react-big-calendar": "^1.19.4",
+    "recharts": "^3.6.0"
+  }
+}
