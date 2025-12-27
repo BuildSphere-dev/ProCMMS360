@@ -9,10 +9,8 @@ import enum
 class EquipmentCategory(enum.Enum):
     Mechanical = "Mechanical"
     Electrical = "Electrical"
-    IT = "IT"
     Vehicle = "Vehicle"
     Other = "Other"
-
 
 class Equipment(Base):
     __tablename__ = "equipment"

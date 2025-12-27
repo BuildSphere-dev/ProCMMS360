@@ -1,5 +1,5 @@
 from app.database import get_db
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import Optional
 from datetime import date
@@ -26,14 +26,44 @@ def create_equipment(
     location: Optional[str] = None,
     db: Session = Depends(get_db)
 ):
+    # 1. Duplicate check
+    existing = (
+        db.query(Equipment)
+        .filter(Equipment.serial_number == serial_number)
+        .first()
+    )
+    if existing:
+        raise HTTPException(
+            status_code=400,
+            detail="Equipment with this serial number already exists"
+        )
+
+    # 2. Create equipment
+    equipment = Equipment(
+        name=name,
+        serial_number=serial_number,
+        category=category,
+        department_id=department_id,
+        assigned_employee_id=assigned_employee_id,
+        maintenance_team_id=maintenance_team_id,
+        default_technician_id=default_technician_id,
+        purchase_date=purchase_date,
+        warranty_expiry_date=warranty_expiry_date,
+        location=location
+    )
+
+    db.add(equipment)
+    db.commit()
+    db.refresh(equipment)
+
+    # 3. Response
     return {
-        "message": "Equipment created",
+        "message": "Equipment created successfully",
         "data": {
-            "name": name,
-            "serial_number": serial_number,
-            "category": category,
-            "maintenance_team_id": maintenance_team_id,
-            "default_technician_id": default_technician_id
+            "id": equipment.id,
+            "name": equipment.name,
+            "serial_number": equipment.serial_number,
+            "category": equipment.category
         }
     }
 

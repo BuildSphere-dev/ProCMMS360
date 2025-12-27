@@ -1,16 +1,4 @@
-version: "3.9"
-
 services:
-  backend:
-    build: .
-    container_name: maintaflow-backend
-    ports:
-      - "8000:8000"
-    env_file:
-      - .env
-    depends_on:
-      - db
-
   db:
     image: postgres:15
     container_name: maintaflow-db
@@ -22,6 +10,22 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: .
+    container_name: maintaflow-backend
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
 
 volumes:
   postgres_data:
