@@ -10,11 +10,16 @@ from app.models.maintenance_request import (
 )
 from app.models.equipment import Equipment
 from app.schemas.maintenance_requests import MaintenanceRequestCreate
+from app.core.swagger import oauth2_scheme
+from fastapi import APIRouter, Depends
 
 router = APIRouter(
-    dependencies=[Depends(get_current_user)]
+    dependencies=[
+        Depends(get_current_user)
+    ],
+    # 👇 THIS MAKES SWAGGER SHOW 🔒
+    responses={401: {"description": "Unauthorized"}},
 )
-
 
 @router.post("/")
 def create_request(payload: MaintenanceRequestCreate, db: Session = Depends(get_db)):

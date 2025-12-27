@@ -6,9 +6,15 @@ from app.models.equipment import Equipment
 from app.models.maintenance_request import MaintenanceRequest, RequestStatus
 from app.schemas.equipment import EquipmentCreate,  EquipmentUpdate
 from app.core.auth import get_current_user
+from app.core.swagger import oauth2_scheme
+from fastapi import APIRouter, Depends
 
 router = APIRouter(
-    dependencies=[Depends(get_current_user)]
+    dependencies=[
+        Depends(get_current_user)
+    ],
+    # 👇 THIS MAKES SWAGGER SHOW 🔒
+    responses={401: {"description": "Unauthorized"}},
 )
 
 

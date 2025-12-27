@@ -3,11 +3,16 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.user import User
 from app.core.auth import get_current_user
+from app.core.swagger import oauth2_scheme
+from fastapi import APIRouter, Depends
 
 router = APIRouter(
-    dependencies=[Depends(get_current_user)]
+    dependencies=[
+        Depends(get_current_user)
+    ],
+    # 👇 THIS MAKES SWAGGER SHOW 🔒
+    responses={401: {"description": "Unauthorized"}},
 )
-
 
 @router.get("/")
 def list_users(db: Session = Depends(get_db)):

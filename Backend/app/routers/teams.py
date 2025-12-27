@@ -5,11 +5,16 @@ from app.database import get_db
 from app.models.team import MaintenanceTeam, TeamMember
 from app.schemas.team import TeamCreate, TeamMemberAdd
 from app.core.auth import get_current_user
+from app.core.swagger import oauth2_scheme
+from fastapi import APIRouter, Depends
 
 router = APIRouter(
-    dependencies=[Depends(get_current_user)]
+    dependencies=[
+        Depends(get_current_user)
+    ],
+    # 👇 THIS MAKES SWAGGER SHOW 🔒
+    responses={401: {"description": "Unauthorized"}},
 )
-
 
 @router.post("/")
 def create_team(payload: TeamCreate, db: Session = Depends(get_db)):

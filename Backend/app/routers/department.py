@@ -5,6 +5,16 @@ from Backend.app.core.auth import get_current_user
 from app.database import get_db
 from app.models.department import Department
 from app.schemas.department import DepartmentCreate, DepartmentRead
+from app.core.swagger import oauth2_scheme
+from fastapi import APIRouter, Depends
+
+router = APIRouter(
+    dependencies=[
+        Depends(get_current_user)
+    ],
+    # 👇 THIS MAKES SWAGGER SHOW 🔒
+    responses={401: {"description": "Unauthorized"}},
+)
 
 router = APIRouter(
     dependencies=[Depends(get_current_user)]
