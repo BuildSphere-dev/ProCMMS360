@@ -1,232 +1,158 @@
-import React, { useState } from "react";
-import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
-import { Calendar, dateFnsLocalizer } from "react-big-calendar";
-import { format, parse, startOfWeek, getDay } from "date-fns";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  CartesianGrid,
-} from "recharts";
-import "react-big-calendar/lib/css/react-big-calendar.css";
-import "./dashboard.css"; // Ensure you create this file
+import React from 'react';
+import Layout from '../../components/Layout';
+import { Wrench, AlertTriangle, CheckCircle2, Clock, ClipboardList } from 'lucide-react';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
-/* ------------------ Calendar Setup ------------------ */
-const localizer = dateFnsLocalizer({
-  format,
-  parse,
-  startOfWeek,
-  getDay,
-});
-
-/* ------------------ Icons ------------------ */
-const Icons = {
-  Kanban: () => <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" /></svg>,
-  Calendar: () => <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>,
-  Chart: () => <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>,
-  Tech: () => <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>,
-  Warning: () => <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="#f87171" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
-};
-
-/* ------------------ Data ------------------ */
-const initialKanban = {
-  New: [
-    { id: "1", title: "Motor Failure", priority: "High", technician: "Alex M.", overdue: true },
-    { id: "2", title: "Oil Leakage", priority: "Medium", technician: "Sarah J.", overdue: false },
-  ],
-  "In Progress": [
-    { id: "3", title: "Belt Replacement", priority: "Low", technician: "Mike R.", overdue: false },
-  ],
-  Repaired: [],
-  Scrap: [],
-};
-
-const calendarEvents = [
-  { title: "Preventive Check - Conveyor", start: new Date(), end: new Date() },
+const chartData = [
+  { name: 'Mon', completed: 4, pending: 2 },
+  { name: 'Tue', completed: 7, pending: 5 },
+  { name: 'Wed', completed: 5, pending: 8 },
+  { name: 'Thu', completed: 10, pending: 3 },
+  { name: 'Fri', completed: 8, pending: 4 },
+  { name: 'Sat', completed: 3, pending: 1 },
+  { name: 'Sun', completed: 2, pending: 1 },
 ];
 
-const reportData = [
-  { name: "Team A", requests: 24 },
-  { name: "Team B", requests: 15 },
-  { name: "Team C", requests: 30 },
-  { name: "Team D", requests: 12 },
-  { name: "Team E", requests: 45 },
+const activityData = [
+  { id: 1, equipment: 'CNC Machine 04', type: 'Repair', priority: 'High', status: 'In Progress', date: '2025-05-15' },
+  { id: 2, equipment: 'Conveyor Belt A2', type: 'Inspection', priority: 'Medium', status: 'Completed', date: '2025-05-15' },
+  { id: 3, equipment: 'Laser Cutter X1', type: 'Calibration', priority: 'Critical', status: 'Pending', date: '2025-05-16' },
+  { id: 4, equipment: 'Forklift F-09', type: 'Oil Change', priority: 'Low', status: 'Completed', date: '2025-05-13' },
 ];
 
-/* ------------------ Main Component ------------------ */
-export default function Dashboard() {
-  const [kanban, setKanban] = useState(initialKanban);
-  const [view, setView] = useState("kanban");
+const priorityBadge = (p) => ({
+  Critical: 'badge badge-error',
+  High: 'badge badge-warning',
+  Medium: 'badge badge-info',
+  Low: 'badge badge-neutral',
+}[p] || 'badge badge-neutral');
 
-  const onDragEnd = (result) => {
-    if (!result.destination) return;
-    const { source, destination } = result;
-    const sourceCol = [...kanban[source.droppableId]];
-    const destCol = [...kanban[destination.droppableId]];
-    const [moved] = sourceCol.splice(source.index, 1);
+const Dashboard = () => (
+  <Layout title="Operations Overview">
+    <div className="page-sections">
+      {/* Stat Cards */}
+      <div className="grid-4">
+        {[
+          { label: 'Pending Requests', value: 12, icon: Clock, c: 'var(--brand)', t: '+20% vs last week', up: true },
+          { label: 'In Progress', value: 8, icon: Wrench, c: 'var(--info)', t: '+5% vs last week', up: true },
+          { label: 'Completed', value: 45, icon: CheckCircle2, c: 'var(--success)', t: '+12% vs last week', up: true },
+          { label: 'Critical Alerts', value: 3, icon: AlertTriangle, c: 'var(--error)', t: '-10% vs last week', up: false },
+        ].map((s, i) => (
+          <div className="stat-card" key={i}>
+            <div>
+              <div className="stat-label">{s.label}</div>
+              <div className="stat-value">{s.value}</div>
+              <div className={`stat-trend ${s.up ? 'up' : 'down'}`}>{s.t}</div>
+            </div>
+            <div className="stat-icon-wrap">
+              <s.icon size={24} style={{ color: s.c }} />
+            </div>
+          </div>
+        ))}
+      </div>
 
-    if (source.droppableId === destination.droppableId) {
-      sourceCol.splice(destination.index, 0, moved);
-      setKanban({ ...kanban, [source.droppableId]: sourceCol });
-    } else {
-      destCol.splice(destination.index, 0, moved);
-      setKanban({ ...kanban, [source.droppableId]: sourceCol, [destination.droppableId]: destCol });
-    }
-  };
-
-  return (
-    <div className="dashboard-app">
-      {/* Background Elements */}
-      <div className="bg-glow bg-glow-1"></div>
-      <div className="bg-glow bg-glow-2"></div>
-
-      {/* Sidebar */}
-      <aside className="sidebar">
-        <div className="brand">
-          <div className="brand-logo">F</div>
-          <h2>FixTrack</h2>
+      {/* Chart + Alerts */}
+      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '20px' }}>
+        <div className="card">
+          <div className="card-header">
+            <div className="card-icon-wrap"><Wrench size={20} /></div>
+            <div>
+              <div className="card-title">Activity Trends</div>
+              <div className="card-subtitle">Daily maintenance tasks this week</div>
+            </div>
+          </div>
+          <ResponsiveContainer width="100%" height={260}>
+            <AreaChart data={chartData}>
+              <defs>
+                <linearGradient id="grad1" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
+                  <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                </linearGradient>
+                <linearGradient id="grad2" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.3}/>
+                  <stop offset="95%" stopColor="#f59e0b" stopOpacity={0}/>
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.04)" />
+              <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} dy={8} />
+              <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} />
+              <Tooltip contentStyle={{ background: '#14161f', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '8px' }} itemStyle={{ color: '#f8fafc' }} />
+              <Area type="monotone" dataKey="completed" stroke="#10b981" fill="url(#grad1)" strokeWidth={2.5} name="Completed" />
+              <Area type="monotone" dataKey="pending" stroke="#f59e0b" fill="url(#grad2)" strokeWidth={2.5} name="Pending" />
+            </AreaChart>
+          </ResponsiveContainer>
         </div>
 
-        <nav className="nav-menu">
-          <SidebarButton 
-            label="Kanban Board" 
-            icon={<Icons.Kanban />} 
-            active={view === "kanban"} 
-            onClick={() => setView("kanban")} 
-          />
-          <SidebarButton 
-            label="Calendar" 
-            icon={<Icons.Calendar />} 
-            active={view === "calendar"} 
-            onClick={() => setView("calendar")} 
-          />
-          <SidebarButton 
-            label="Reports" 
-            icon={<Icons.Chart />} 
-            active={view === "reports"} 
-            onClick={() => setView("reports")} 
-          />
-        </nav>
-
-        <div className="user-profile">
-          <div className="avatar"></div>
-          <div className="user-info">
-            <p className="name">Admin User</p>
-            <p className="role">Maintenance Lead</p>
+        <div className="card">
+          <div className="card-header">
+            <div className="card-icon-wrap" style={{ background: 'rgba(239,68,68,0.1)' }}>
+              <AlertTriangle size={20} style={{ color: 'var(--error)' }} />
+            </div>
+            <div><div className="card-title">System Alerts</div></div>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div className="alert-card alert-error-card">
+              <div className="alert-dot alert-dot-error" />
+              <div><p>Critical Overheat</p><span>CNC-04 reached 120°C. Emergency shutdown triggered.</span></div>
+            </div>
+            <div className="alert-card alert-warning-card">
+              <div className="alert-dot alert-dot-warning" />
+              <div><p>Warranty Expiry</p><span>Conveyor Belt A2 warranty expires in 14 days.</span></div>
+            </div>
+            <div className="alert-card alert-warning-card">
+              <div className="alert-dot alert-dot-warning" />
+              <div><p>Overdue Service</p><span>Forklift F-09 is 5 days past scheduled maintenance.</span></div>
+            </div>
           </div>
         </div>
-      </aside>
+      </div>
 
-      {/* Main Content */}
-      <main className="main-content">
-        <header className="top-header">
+      {/* Recent Requests Table */}
+      <div className="card">
+        <div className="card-header">
+          <div className="card-icon-wrap"><ClipboardList size={20} /></div>
           <div>
-            <h1>{view === "kanban" ? "Maintenance Kanban" : view === "calendar" ? "Schedule" : "Analytics"}</h1>
-            <p className="date-sub">{format(new Date(), "EEEE, d MMMM yyyy")}</p>
+            <div className="card-title">Recent Maintenance Requests</div>
+            <div className="card-subtitle">Live service tickets</div>
           </div>
-          <button className="add-btn">+ New Request</button>
-        </header>
-
-        <div className="content-body">
-          {view === "kanban" && (
-            <DragDropContext onDragEnd={onDragEnd}>
-              <div className="kanban-board">
-                {Object.keys(kanban).map((col) => (
-                  <Droppable droppableId={col} key={col}>
-                    {(provided) => (
-                      <div ref={provided.innerRef} {...provided.droppableProps} className="kanban-column">
-                        <div className="column-header">
-                          <h3>{col}</h3>
-                          <span className="count-badge">{kanban[col].length}</span>
-                        </div>
-                        <div className="column-body">
-                          {kanban[col].map((task, index) => (
-                            <Draggable draggableId={task.id} index={index} key={task.id}>
-                              {(provided, snapshot) => (
-                                <div
-                                  ref={provided.innerRef}
-                                  {...provided.draggableProps}
-                                  {...provided.dragHandleProps}
-                                  className={`kanban-card ${snapshot.isDragging ? "dragging" : ""} ${task.overdue ? "card-overdue" : "card-normal"}`}
-                                  style={{ ...provided.draggableProps.style }}
-                                >
-                                  <div className="card-top">
-                                    <span className={`priority-tag ${task.priority.toLowerCase()}`}>{task.priority}</span>
-                                    {task.overdue && <Icons.Warning />}
-                                  </div>
-                                  <p className="card-title">{task.title}</p>
-                                  <div className="card-footer">
-                                    <div className="tech-info">
-                                      <Icons.Tech />
-                                      <span>{task.technician}</span>
-                                    </div>
-                                    <span className="task-id">#{task.id}</span>
-                                  </div>
-                                </div>
-                              )}
-                            </Draggable>
-                          ))}
-                          {provided.placeholder}
-                        </div>
-                      </div>
-                    )}
-                  </Droppable>
-                ))}
-              </div>
-            </DragDropContext>
-          )}
-
-          {view === "calendar" && (
-            <div className="glass-panel calendar-wrapper">
-              <Calendar
-                localizer={localizer}
-                events={calendarEvents}
-                startAccessor="start"
-                endAccessor="end"
-                selectable
-                style={{ height: 600 }}
-              />
-            </div>
-          )}
-
-          {view === "reports" && (
-            <div className="glass-panel chart-wrapper">
-              <h3>Requests per Team</h3>
-              <ResponsiveContainer width="100%" height={400}>
-                <BarChart data={reportData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
-                  <XAxis dataKey="name" stroke="#94a3b8" tick={{ fill: '#94a3b8' }} axisLine={false} tickLine={false} />
-                  <YAxis stroke="#94a3b8" tick={{ fill: '#94a3b8' }} axisLine={false} tickLine={false} />
-                  <Tooltip 
-                    cursor={{ fill: 'rgba(255,255,255,0.05)' }}
-                    contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '8px', color: '#fff' }}
-                  />
-                  <Bar dataKey="requests" fill="url(#colorView)" radius={[6, 6, 0, 0]} barSize={50} />
-                  <defs>
-                    <linearGradient id="colorView" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#38bdf8" stopOpacity={1}/>
-                      <stop offset="100%" stopColor="#2563eb" stopOpacity={0.8}/>
-                    </linearGradient>
-                  </defs>
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          )}
         </div>
-      </main>
+        <div className="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Equipment</th>
+                <th>Type</th>
+                <th>Priority</th>
+                <th>Status</th>
+                <th style={{ textAlign: 'right' }}>Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              {activityData.map((row) => (
+                <tr key={row.id}>
+                  <td>
+                    <div className="flex-row">
+                      <Wrench size={14} style={{ color: 'var(--brand)' }} />
+                      <span style={{ fontWeight: 500 }}>{row.equipment}</span>
+                    </div>
+                  </td>
+                  <td className="text-secondary text-sm">{row.type}</td>
+                  <td><span className={priorityBadge(row.priority)}>{row.priority}</span></td>
+                  <td>
+                    <div className="flex-row">
+                      <span className={`status-dot ${row.status === 'Completed' ? 'status-dot-success' : 'status-dot-info'}`} />
+                      <span className="text-sm">{row.status}</span>
+                    </div>
+                  </td>
+                  <td className="text-muted text-sm font-mono" style={{ textAlign: 'right' }}>{row.date}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
-  );
-}
+  </Layout>
+);
 
-function SidebarButton({ label, icon, active, onClick }) {
-  return (
-    <button onClick={onClick} className={`sidebar-btn ${active ? "active" : ""}`}>
-      {icon}
-      <span>{label}</span>
-      {active && <div className="active-indicator" />}
-    </button>
-  );
-}
+export default Dashboard;

@@ -1,81 +1,93 @@
-import { useState } from "react";
-import "./signup.css";
+import React, { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { Mail, Lock, User, UserPlus, ShieldCheck } from 'lucide-react';
+import { signupUser } from '../../api/auth.api';
 
-export default function Signup() {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+const Signup = () => {
+  const [form, setForm] = useState({ name: '', email: '', password: '', confirm: '' });
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
 
-  const handleSignup = async (e) => {
+  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    if (form.password !== form.confirm) return setError('Passwords do not match');
     setLoading(true);
-    setError("");
-
+    setError('');
     try {
-      const res = await fetch("http://localhost:8000/api/users/", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name,
-          email,
-          password, // backend me password_hash bana lena
-        }),
-      });
-
-      if (!res.ok) throw new Error("Signup failed");
-
-      window.location.href = "/login";
+      await signupUser({ name: form.name, email: form.email, password: form.password });
+      navigate('/login');
     } catch (err) {
-      setError(err.message);
+      setError(err.response?.data?.detail || 'Registration failed');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="signup-bg">
-      <div className="signup-card">
-        <h1 className="logo">FixTrack</h1>
-        <p className="subtitle">Create your account</p>
+    <div className="auth-page">
+      <div className="auth-orb1" />
+      <div className="auth-orb2" />
+      <div className="auth-box">
+        <div className="auth-logo">
+          <div className="auth-logo-icon">
+            <ShieldCheck size={32} />
+          </div>
+          <h1>Create Account</h1>
+          <p>Join FixTrack for industrial-grade maintenance</p>
+        </div>
 
-        {error && <p className="error">{error}</p>}
+        <div className="auth-card">
+          <form className="auth-form" onSubmit={handleSubmit}>
+            <div className="form-group">
+              <label className="form-label">Full Name</label>
+              <div className="input-wrap">
+                <User size={16} />
+                <input className="form-input has-icon" name="name" placeholder="John Doe" value={form.name} onChange={handleChange} required />
+              </div>
+            </div>
+            <div className="form-group">
+              <label className="form-label">Email Address</label>
+              <div className="input-wrap">
+                <Mail size={16} />
+                <input className="form-input has-icon" name="email" type="email" placeholder="john@company.com" value={form.email} onChange={handleChange} required />
+              </div>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div className="form-group">
+                <label className="form-label">Password</label>
+                <div className="input-wrap">
+                  <Lock size={16} />
+                  <input className="form-input has-icon" name="password" type="password" placeholder="••••••••" value={form.password} onChange={handleChange} required />
+                </div>
+              </div>
+              <div className="form-group">
+                <label className="form-label">Confirm</label>
+                <div className="input-wrap">
+                  <Lock size={16} />
+                  <input className="form-input has-icon" name="confirm" type="password" placeholder="••••••••" value={form.confirm} onChange={handleChange} required />
+                </div>
+              </div>
+            </div>
 
-        <form onSubmit={handleSignup}>
-          <input
-            type="text"
-            placeholder="Full Name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            required
-          />
+            {error && <div className="alert-error">{error}</div>}
 
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
+            <button type="submit" className="btn btn-primary btn-full btn-lg" disabled={loading}>
+              {loading ? <span className="spinner" /> : <UserPlus size={18} />}
+              {loading ? 'Creating...' : 'Get Started'}
+            </button>
+          </form>
 
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-
-          <button disabled={loading}>
-            {loading ? "Creating Account..." : "Sign Up"}
-          </button>
-        </form>
-
-        <p className="switch">
-          Already have an account? <a href="/login">Login</a>
-        </p>
+          <div className="auth-footer">
+            Already have an account?{' '}
+            <Link to="/login" className="auth-link">Sign In</Link>
+          </div>
+        </div>
       </div>
     </div>
   );
-}
+};
+
+export default Signup;
